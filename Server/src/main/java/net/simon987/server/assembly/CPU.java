@@ -3,6 +3,10 @@ package net.simon987.server.assembly;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
+import org.luaj.vm2.*;
+import org.luaj.vm2.lib.*;
+import org.luaj.vm2.lib.jse.JsePlatform;
+import net.simon987.server.assembly.LuaMAR;
 import net.simon987.server.GameServer;
 import net.simon987.server.ServerConfiguration;
 import net.simon987.server.assembly.exception.CancelledException;
@@ -122,6 +126,13 @@ public class CPU implements MongoSerialisable {
         status.clear();
 
         registerSetSize = registerSet.size();
+
+        // Lua Stuff
+        Globals globals = JsePlatform.standardGlobals();
+        LuaMAR lm = new LuaMAR(this);
+        globals.set("mar", lm.init()); 
+        LuaValue chunk = globals.loadfile("./script.lua");
+        chunk.call();
 
         // status.breakFlag = true;
         while (!status.isBreakFlag()) {
